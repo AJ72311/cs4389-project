@@ -1,6 +1,9 @@
 venv/
+.venv/
 __pycache__/
 *.pyc
 ecommerce.db
+shop.db
+app.log
 .env
 .DS_Store
