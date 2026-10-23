@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from database import get_db, init_db
 import misconfig # Marc: debug leaks and permissive headers.
+import deserialization # Shreya: cart cookie deserialization demo and fix
 import idor # Prajit: IDOR demo and session-ownership mitigation, Role BAC bypass demo and its admin-role verification fix
 
 app = Flask(__name__)
@@ -10,6 +11,9 @@ init_db()
 misconfig.init_app(app) # Marc: registers routes, headers, and hardened mode handlers
 
 app.register_blueprint(idor.idor_bp) # Prajit: Registers the blueprint
+
+deserialization.init_orders_table()
+app.register_blueprint(deserialization.deser_bp) # Shreya: insecure deserialization (cart cookie tampering) and signed/validated fix
 
 @app.route('/')
 def index():
