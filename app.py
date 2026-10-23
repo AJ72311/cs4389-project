@@ -9,7 +9,7 @@ app.secret_key = 'key-123'
 init_db()
 misconfig.init_app(app) # Marc: registers routes, headers, and hardened mode handlers
 
-app.register_blueprint(idor.idor_bp # Prajit: Registers the blueprint
+app.register_blueprint(idor.idor_bp) # Prajit: Registers the blueprint
 
 @app.route('/')
 def index():

@@ -1,10 +1,5 @@
 """
-Security misconfiguration module (Marc): debug leaks and permissive headers.
-
-Plug into the shared app with two lines in app.py:
-
-    import misconfig
-    misconfig.init_app(app)
+Security misconfiguration module: debug leaks and permissive headers.
 
 Mode is chosen with the APP_MODE environment variable:
 
@@ -14,9 +9,6 @@ Mode is chosen with the APP_MODE environment variable:
   hardened             : debug off, generic errors with an error ID, details
                          logged server side only, security headers, CORS
                          allowlist, strong secret key, no debug route.
-
-Run on localhost only. The Werkzeug debugger in vulnerable mode can run code
-on the server.
 """
 
 import logging
@@ -123,7 +115,10 @@ def add_headers(response):
         # Note: the Flask development server adds its own Server banner that the
         # app cannot remove. A production server or reverse proxy hides it.
         response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'"
+            "default-src 'self'; "
+            "style-src 'self' https://cdn.jsdelivr.net; "
+            "script-src 'self' https://cdn.jsdelivr.net; "
+            "frame-ancestors 'none'; object-src 'none'; base-uri 'self'"
         )
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-Content-Type-Options"] = "nosniff"
