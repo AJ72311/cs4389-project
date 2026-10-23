@@ -11,7 +11,7 @@ idor_bp = Blueprint('idor', __name__)
 def get_user_vulnerable(user_id):
     # Enforce Authentication (There must be an active session)
     if 'user' not in session:
-        return jsonify({'error': 'Unauthorized: Please log in first'}), 401
+        return jsonify({'error': 'Unauthorized'}), 401
     
     # VULNERABLE: Fetches profile by ID without checking if it belongs to the logged-in user.
     conn = get_db()
