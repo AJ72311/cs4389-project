@@ -3,6 +3,7 @@ from database import get_db, init_db
 import misconfig # Marc: debug leaks and permissive headers.
 import deserialization # Shreya: cart cookie deserialization demo and fix
 import idor # Prajit: IDOR demo and session-ownership mitigation, Role BAC bypass demo and its admin-role verification fix
+import sqli # Hamza: SQLi demo
 
 app = Flask(__name__)
 app.secret_key = 'key-123'
@@ -14,6 +15,8 @@ app.register_blueprint(idor.idor_bp) # Prajit: Registers the blueprint
 
 deserialization.init_orders_table()
 app.register_blueprint(deserialization.deser_bp) # Shreya: insecure deserialization (cart cookie tampering) and signed/validated fix
+
+app.register_blueprint(sqli.sqli_bp) # Hamza: Add the SQLi routes to the app
 
 @app.route('/')
 def index():
@@ -28,18 +31,18 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        
+
         conn = get_db()
         user = conn.execute('SELECT * FROM users WHERE username = ? AND password = ?', (username, password)).fetchone()
         conn.close()
-        
+
         if user:
             session['user'] = user['username']
             session['role'] = user['role']
             return redirect(url_for('index'))
         else:
             error = 'Invalid credentials'
-            
+
     return render_template('login.html', error=error)
 
 @app.route('/logout')
@@ -48,4 +51,4 @@ def logout():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(debug=misconfig.VULNERABLE, port=5000)  
+    app.run(debug=misconfig.VULNERABLE, port=5000)
