@@ -4,6 +4,7 @@ import misconfig # Marc: debug leaks and permissive headers.
 import deserialization # Shreya: cart cookie deserialization demo and fix
 import idor # Prajit: IDOR demo and session-ownership mitigation, Role BAC bypass demo and its admin-role verification fix
 import sqli # Hamza: SQLi demo
+import xss # Nitin: reflected/stored XSS demo and output-encoding fix
 
 app = Flask(__name__)
 app.secret_key = 'key-123'
@@ -17,6 +18,8 @@ deserialization.init_orders_table()
 app.register_blueprint(deserialization.deser_bp) # Shreya: insecure deserialization (cart cookie tampering) and signed/validated fix
 
 app.register_blueprint(sqli.sqli_bp) # Hamza: Add the SQLi routes to the app
+xss.init_reviews_table()
+app.register_blueprint(xss.xss_bp) # Nitin: reflected search + stored reviews XSS
 
 @app.route('/')
 def index():
