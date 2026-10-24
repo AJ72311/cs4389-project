@@ -1,14 +1,10 @@
 """
 Security misconfiguration module: debug leaks and permissive headers.
 
-Mode is chosen with the APP_MODE environment variable:
+  vulnerable (default) : debug on 
 
-  vulnerable (default) : the app's baseline. Debug mode on, weak secret key,
-                         leftover debug route, version banner, and a CORS policy
-                         that trusts every origin.
-  hardened             : debug off, generic errors with an error ID, details
-                         logged server side only, security headers, CORS
-                         allowlist, strong secret key, no debug route.
+  hardened             : debug off
+ 
 """
 
 import logging
