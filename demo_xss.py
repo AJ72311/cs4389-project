@@ -67,9 +67,37 @@ def stored_demo():
     }
 
 
+def defenses_demo():
+    banner("DEFENSE IN DEPTH: CSP, HttpOnly cookie, JS-context encoding")
+    c = app.test_client()
+
+    # 1. CSP header on the secure pages only.
+    secure_csp = c.get("/xss/secure/search").headers.get("Content-Security-Policy", "")
+    vuln_csp = c.get("/xss/vulnerable/search").headers.get("Content-Security-Policy", "")
+    csp_ok = "script-src 'self'" in secure_csp and "unsafe-inline" not in secure_csp
+    print("1. Secure page sends a CSP that blocks inline scripts:", csp_ok)
+    print("   Vulnerable page CSP:", vuln_csp or "(none)")
+
+    # 2. HttpOnly + SameSite on the session cookie set at login.
+    r = c.post("/login", data={"username": "alice", "password": "password123"})
+    cookie = r.headers.get("Set-Cookie", "")
+    httponly_ok = "HttpOnly" in cookie
+    print("2. Session cookie is HttpOnly:", httponly_ok, "| SameSite=Lax:", "SameSite=Lax" in cookie)
+
+    # 3. The search term handed to JavaScript is JSON-encoded, not raw.
+    body = c.get("/xss/secure/search", query_string={"q": PAYLOAD}).data.decode()
+    start = body.index('id="search-data">') + len('id="search-data">')
+    block = body[start:body.index("</script>", start)]
+    js_ok = "\\u003cscript\\u003e" in block and "<script>" not in block
+    print("3. Search term in the JS data block is encoded:", js_ok, "->", block)
+
+    return {"csp": csp_ok, "httponly": httponly_ok, "js": js_ok}
+
+
 if __name__ == "__main__":
     r1 = reflected_demo()
     r2 = stored_demo()
+    r3 = defenses_demo()
 
     banner("SUMMARY")
     print(f"Reflected: vulnerable ran the payload -> {r1['vuln_raw']}, "
@@ -78,5 +106,9 @@ if __name__ == "__main__":
           f"secure escaped it -> {r2['secure_escaped']} (raw present: {r2['secure_raw']})")
 
     assert r1["vuln_raw"] and not r1["secure_raw"] and r1["secure_escaped"]
+    print(f"Defenses:  CSP -> {r3['csp']}, HttpOnly -> {r3['httponly']}, "
+          f"JS-context encoding -> {r3['js']}")
+
     assert r2["vuln_raw"] and not r2["secure_raw"] and r2["secure_escaped"]
+    assert r3["csp"] and r3["httponly"] and r3["js"]
     print("\nAll checks passed.")
