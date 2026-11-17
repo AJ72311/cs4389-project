@@ -22,8 +22,9 @@ Defense in depth on the secure routes (on top of output escaping):
   1. Content-Security-Policy header: the browser refuses inline scripts
      and scripts from other sites, so even if escaping were missed
      somewhere, an injected <script> would not run.
-  2. HttpOnly session cookie: page scripts cannot read the session cookie.
-     Set explicitly in harden_session_cookie().
+  2. HttpOnly session cookie: in hardened mode page scripts cannot read the
+     session cookie, so a stolen-cookie payload gets nothing (see the
+     cookie-theft demo in demo_xss.py). Set in harden_session_cookie().
   3. JavaScript-context encoding: when user input is handed to JavaScript,
      it goes through Jinja's |tojson filter (which escapes <, >, & and
      quotes) inside a non-executing JSON data block, and the static script
@@ -33,8 +34,14 @@ Defense in depth on the secure routes (on top of output escaping):
 from flask import Blueprint, make_response, redirect, render_template, request, session, url_for
 
 from database import get_db
+import misconfig  # APP_MODE drives whether the session cookie is HttpOnly
 
 xss_bp = Blueprint('xss', __name__)
+
+# Simulated attacker collector. In the cookie-theft demo the injected script
+# sends the victim's cookie here; a real attack would use the attacker's own
+# server. Kept in memory so demo_xss.py can inspect what was received.
+STOLEN_COOKIES = []
 
 # Strict policy for the secure XSS pages: scripts only from this app,
 # no inline scripts, no plugins. Bootstrap CSS comes from jsDelivr.
@@ -49,12 +56,14 @@ SECURE_CSP = (
 def harden_session_cookie(app):
     """Defense 2: keep the session cookie away from page scripts.
 
-    Flask already defaults SESSION_COOKIE_HTTPONLY to True; setting it here
-    makes the defense explicit and keeps it on even if someone changes the
-    default elsewhere. SameSite=Lax also stops the cookie riding along on
+    HttpOnly stops page scripts, and therefore any injected XSS payload, from
+    reading the session cookie through document.cookie. It is the defense, so
+    it is on in hardened mode and off in vulnerable mode. That matches the
+    project's vulnerable/hardened split and lets the cookie-theft demo show a
+    real before and after. SameSite=Lax also stops the cookie riding along on
     cross-site POSTs.
     """
-    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_HTTPONLY'] = not misconfig.VULNERABLE
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 
@@ -63,6 +72,13 @@ def secure_page(html):
     resp = make_response(html)
     resp.headers['Content-Security-Policy'] = SECURE_CSP
     return resp
+
+
+@xss_bp.route('/xss/attacker/steal')
+def attacker_steal():
+    """Stand-in for an attacker's server; the stored-XSS payload points here."""
+    STOLEN_COOKIES.append(request.args.get('c', ''))
+    return '', 204
 
 
 def init_reviews_table():
