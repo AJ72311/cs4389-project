@@ -5,6 +5,7 @@ import deserialization # Shreya: cart cookie deserialization demo and fix
 import idor # Prajit: IDOR demo and session-ownership mitigation, Role BAC bypass demo and its admin-role verification fix
 import sqli # Hamza: SQLi demo
 import xss # Nitin: reflected/stored XSS demo and output-encoding fix
+import csrf # Michael: CSRF demo and synchronizer-token fix
 
 app = Flask(__name__)
 app.secret_key = 'key-123'
@@ -20,6 +21,8 @@ app.register_blueprint(deserialization.deser_bp) # Shreya: insecure deserializat
 app.register_blueprint(sqli.sqli_bp) # Hamza: Add the SQLi routes to the app
 xss.init_reviews_table()
 app.register_blueprint(xss.xss_bp) # Nitin: reflected search + stored reviews XSS
+csrf.init_wallets_table()
+app.register_blueprint(csrf.csrf_bp) # Michael: forged store-credit transfer vs. CSRF token check
 
 @app.route('/')
 def index():
