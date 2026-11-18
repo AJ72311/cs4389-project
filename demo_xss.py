@@ -79,14 +79,17 @@ def defenses_demo():
     print("1. Secure page sends a CSP that blocks inline scripts:", csp_ok)
     print("   Vulnerable page CSP:", vuln_csp or "(none)")
 
-    # 2. HttpOnly on the session cookie: on in hardened mode, off in vulnerable.
+    # 2. HttpOnly and SameSite=Lax on the session cookie: on in hardened
+    # mode, off in vulnerable (SameSite would also block the CSRF demo).
     r = c.post("/login", data={"username": "alice", "password": "password123"})
     cookie = r.headers.get("Set-Cookie", "")
     httponly = "HttpOnly" in cookie
+    samesite = "SameSite=Lax" in cookie
     httponly_ok = httponly == (not misconfig.VULNERABLE)
-    print(f"2. Session cookie HttpOnly: {httponly} (expected {not misconfig.VULNERABLE} "
-          f"in {'vulnerable' if misconfig.VULNERABLE else 'hardened'} mode)",
-          "| SameSite=Lax:", "SameSite=Lax" in cookie)
+    samesite_ok = samesite == (not misconfig.VULNERABLE)
+    print(f"2. Session cookie HttpOnly: {httponly}, SameSite=Lax: {samesite} "
+          f"(expected {not misconfig.VULNERABLE} for both in "
+          f"{'vulnerable' if misconfig.VULNERABLE else 'hardened'} mode)")
 
     # 3. The search term handed to JavaScript is JSON-encoded, not raw.
     body = c.get("/xss/secure/search", query_string={"q": PAYLOAD}).data.decode()
@@ -95,7 +98,7 @@ def defenses_demo():
     js_ok = "\\u003cscript\\u003e" in block and "<script>" not in block
     print("3. Search term in the JS data block is encoded:", js_ok, "->", block)
 
-    return {"csp": csp_ok, "httponly": httponly_ok, "js": js_ok}
+    return {"csp": csp_ok, "httponly": httponly_ok, "samesite": samesite_ok, "js": js_ok}
 
 
 def cookie_theft_demo():
@@ -123,6 +126,7 @@ def cookie_theft_demo():
     c.get("/xss/attacker/steal", query_string={"c": document_cookie})
     stolen = STOLEN_COOKIES[-1] if STOLEN_COOKIES else ""
     print(f"2. Cookie is HttpOnly: {httponly} -> attacker received: {stolen!r}")
+    print("   /xss/attacker/log shows:", c.get("/xss/attacker/log").get_json()["stolen_cookies"])
 
     theft_worked = bool(stolen)
     expected = misconfig.VULNERABLE  # theft should work only in vulnerable mode
@@ -146,13 +150,13 @@ if __name__ == "__main__":
 
     assert r1["vuln_raw"] and not r1["secure_raw"] and r1["secure_escaped"]
     print(f"Defenses:  CSP -> {r3['csp']}, HttpOnly -> {r3['httponly']}, "
-          f"JS-context encoding -> {r3['js']}")
+          f"SameSite -> {r3['samesite']}, JS-context encoding -> {r3['js']}")
 
     print(f"Cookie theft: payload served raw -> {r4['served_raw']}, "
           f"theft worked -> {r4['theft_worked']} "
           f"(expected {r4['expected']} in this mode)")
 
     assert r2["vuln_raw"] and not r2["secure_raw"] and r2["secure_escaped"]
-    assert r3["csp"] and r3["httponly"] and r3["js"]
+    assert r3["csp"] and r3["httponly"] and r3["samesite"] and r3["js"]
     assert r4["served_raw"] and r4["theft_worked"] == r4["expected"]
     print("\nAll checks passed.")

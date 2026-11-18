@@ -29,12 +29,19 @@ Defense in depth on the secure routes (on top of output escaping):
      it goes through Jinja's |tojson filter (which escapes <, >, & and
      quotes) inside a non-executing JSON data block, and the static script
      writes it to the page with textContent, never innerHTML.
+
+Cookie theft in the browser: in vulnerable mode, post the steal payload
+from demo_xss.py as a review on /xss/vulnerable/reviews, then open
+/xss/attacker/log (stolen cookies are also printed in the server terminal).
+In hardened mode the app-wide CSP from misconfig.py also covers the
+vulnerable pages, so the injected script is blocked before it runs; the
+HttpOnly check on its own is shown by demo_xss.py.
 """
 
-from flask import Blueprint, make_response, redirect, render_template, request, session, url_for
+from flask import Blueprint, jsonify, make_response, redirect, render_template, request, session, url_for
 
 from database import get_db
-import misconfig  # APP_MODE drives whether the session cookie is HttpOnly
+import misconfig  # APP_MODE drives the session cookie's HttpOnly and SameSite flags
 
 xss_bp = Blueprint('xss', __name__)
 
@@ -61,10 +68,11 @@ def harden_session_cookie(app):
     it is on in hardened mode and off in vulnerable mode. That matches the
     project's vulnerable/hardened split and lets the cookie-theft demo show a
     real before and after. SameSite=Lax also stops the cookie riding along on
-    cross-site POSTs.
+    cross-site POSTs, so it is hardened-mode only too: in vulnerable mode it
+    would block the CSRF module's cross-site attack page.
     """
     app.config['SESSION_COOKIE_HTTPONLY'] = not misconfig.VULNERABLE
-    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    app.config['SESSION_COOKIE_SAMESITE'] = None if misconfig.VULNERABLE else 'Lax'
 
 
 def secure_page(html):
@@ -77,8 +85,16 @@ def secure_page(html):
 @xss_bp.route('/xss/attacker/steal')
 def attacker_steal():
     """Stand-in for an attacker's server; the stored-XSS payload points here."""
-    STOLEN_COOKIES.append(request.args.get('c', ''))
+    cookie = request.args.get('c', '')
+    STOLEN_COOKIES.append(cookie)
+    print(f"[attacker] received cookie: {cookie!r}", flush=True)
     return '', 204
+
+
+@xss_bp.route('/xss/attacker/log')
+def attacker_log():
+    """What the attacker has collected so far, for showing the theft live."""
+    return jsonify(stolen_cookies=STOLEN_COOKIES)
 
 
 def init_reviews_table():
