@@ -20,6 +20,7 @@ app.register_blueprint(deserialization.deser_bp) # Shreya: insecure deserializat
 
 app.register_blueprint(sqli.sqli_bp) # Hamza: Add the SQLi routes to the app
 xss.init_reviews_table()
+xss.harden_session_cookie(app) # Nitin: HttpOnly + SameSite on the session cookie
 app.register_blueprint(xss.xss_bp) # Nitin: reflected search + stored reviews XSS
 csrf.init_wallets_table()
 app.register_blueprint(csrf.csrf_bp) # Michael: forged store-credit transfer vs. CSRF token check

@@ -21,6 +21,11 @@
     <div class="card p-3">
         {% if safe %}
             <p>Results for: {{ q }}</p>
+            <p class="text-muted small mb-0">Last search (set by JavaScript): <span id="last-search"></span></p>
+            {# JS-context encoding: |tojson escapes the value for JavaScript,
+               and type="application/json" means the browser never runs it. #}
+            <script type="application/json" id="search-data">{{ {"q": q}|tojson }}</script>
+            <script src="{{ url_for('static', filename='xss_search.js') }}"></script>
         {% else %}
             <p>Results for: {{ q|safe }}</p>
         {% endif %}
