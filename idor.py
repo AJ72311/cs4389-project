@@ -29,7 +29,7 @@ def get_user_secure(user_id):
         return jsonify({'error': 'Unauthorized'}), 401
 
     conn = get_db()
-    user = conn.execute('SELECT id, username, role, password FROM users WHERE id = ?', (user_id,)).fetchone()
+    user = conn.execute('SELECT id, username, role FROM users WHERE id = ?', (user_id,)).fetchone()
     conn.close()
 
     if not user:
@@ -69,7 +69,7 @@ def get_all_users_secure():
         return jsonify({'error': 'Forbidden: Administrator access required'}), 403
 
     conn = get_db()
-    users = conn.execute('SELECT id, username, role, password FROM users').fetchall()
+    users = conn.execute('SELECT id, username, role FROM users').fetchall()
     conn.close()
     
     return jsonify([dict(u) for u in users])
