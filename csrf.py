@@ -12,8 +12,8 @@ Scenario: The attacker wants to steal money from the user during transfer:
     forged transfer is rejected.
 
     Attacker page (/csrf/attacker?target=vulnerable|secure)
-    Simulates the evil site. Open it at http://127.0.0.1:5000 while
-    logged in at http://localhost:5000 so the browser treats it as a
+    Simulates the evil site. Open it at http://127.0.0.1:8000 while
+    logged in at http://localhost:8000 so the browser treats it as a
     different site.
 
     Do NOT run the program here. Run it on demo_csrf.py 
@@ -123,7 +123,7 @@ def csrf_token_valid():
 @csrf_bp.route('/csrf/vulnerable/wallet', methods=['GET', 'POST'])
 def wallet_vulnerable():
     if 'user' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('login', reason='csrf'))
 
     error = None
     if request.method == 'POST':
@@ -144,7 +144,7 @@ def wallet_vulnerable():
 @csrf_bp.route('/csrf/secure/wallet', methods=['GET', 'POST'])
 def wallet_secure():
     if 'user' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('login', reason='csrf'))
 
     error = None
     if request.method == 'POST':
@@ -170,7 +170,7 @@ def attacker():
     if target not in ('vulnerable', 'secure'):
         abort(400)
     # Absolute URL on localhost so the page can be loaded from 127.0.0.1.
-    action = 'http://localhost:5000' + url_for('csrf.wallet_' + target)
+    action = 'http://localhost:8000' + url_for('csrf.wallet_' + target)
     return render_template(
         'csrf_attacker.html', action=action,
         recipient=ATTACKER_USER, amount=ATTACKER_AMOUNT,

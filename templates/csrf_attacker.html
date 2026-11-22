@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>You Won! - Toggle10</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <div class="card p-4 text-center">
+        <h3>You won a free prize!</h3>
+        <form method="POST" action="{{ action }}">
+            <input type="hidden" name="recipient" value="{{ recipient }}">
+            <input type="hidden" name="amount" value="{{ amount }}">
+            <button class="btn btn-success">Claim prize</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

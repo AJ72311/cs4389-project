@@ -6,6 +6,7 @@ import idor # Prajit: IDOR demo and session-ownership mitigation, Role BAC bypas
 import sqli # Hamza: SQLi demo
 import xss # Nitin: reflected/stored XSS demo and output-encoding fix
 import csrf # Michael: CSRF demo and synchronizer-token fix
+import walkthrough
 
 app = Flask(__name__)
 app.secret_key = 'key-123'
@@ -24,6 +25,7 @@ xss.harden_session_cookie(app) # Nitin: HttpOnly + SameSite on the session cooki
 app.register_blueprint(xss.xss_bp) # Nitin: reflected search + stored reviews XSS
 csrf.init_wallets_table()
 app.register_blueprint(csrf.csrf_bp) # Michael: forged store-credit transfer vs. CSRF token check
+app.register_blueprint(walkthrough.walkthrough_bp)
 
 @app.route('/')
 def index():
@@ -35,6 +37,8 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
+    if request.args.get('reason') == 'csrf':
+        error = 'We did not recognize your login for this request'
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -58,4 +62,4 @@ def logout():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(debug=misconfig.VULNERABLE, port=5000)
+    app.run(debug=misconfig.VULNERABLE, port=8000)

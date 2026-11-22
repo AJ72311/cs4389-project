@@ -6,18 +6,24 @@
 ---
 
 ## Dependencies
-* Python 3+
-* Flask
+* Python 3.9 or newer
+* Packages listed in `requirements.txt` (Flask, Werkzeug, Jinja2)
+* SQLite (included with Python, the database file `shop.db` is automatically created if it doesn't already exist)
 
 ---
 
 ## Installation
-`pip install flask`
+```
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+On Windows, activate with `venv\Scripts\activate` instead
 
 ---
 
 ## Execution
-`python app.py` or `python3 app.py`
+`python app.py` or `python3 app.py`, then open http://localhost:8000 in your browser.
 
 ---
 
@@ -25,36 +31,36 @@
 * `admin` / `admin123`
 * `alice` / `password123`
 
-## Security Misconfiguration Demo
-The app starts in vulnerable mode by default. Set `APP_MODE=hardened` to switch.
+---
 
-Hardened mode with the dev server (macOS, Linux, WSL):
+## Using the Demos
+The home page has a demo button for each vulnerability, open one and follow the steps on its page
 
-`APP_MODE=hardened python app.py`
-
-Hardened mode with the dev server (Windows PowerShell):
-
-`$env:APP_MODE="hardened"; python app.py`
-
-Hardened mode with gunicorn (production style, WSL or Linux):
-
-`APP_MODE=hardened SECRET_KEY=<long random value> gunicorn --preload -w 2 -b 127.0.0.1:5000 app:app`
-
-Try `/api/products/999` in both modes. Vulnerable mode shows a full traceback, and hardened mode returns a generic error with an ID, with the details written to `app.log`. Use localhost only.
+The bar at the top displays the current mode, vulnerable or hardened, and the app will always start in vulnerable mode by default. After you log in, press the "Switch" button to change it.
 
 ---
 
-## Current Status (Deliverable 1)
+## Test Scripts
+`python verify_all.py` checks all seven vulnerabilities and prints a PASS or FAIL table
 
-### What currently works:
-SQLite schema generation, product catalog display, user session authentication, session termination, access control setup, basic vulnerability implementations.
+Each vulnerability also has its own script: `demo_sqli.py`, `demo_xss.py`, `demo_idor.py`, `demo_csrf.py` and `demo_deserialization.py`
 
-To execute the cross-site scripting demonstration, launch the core server via `python app.py`. Authenticate using the alice test credentials, then evaluate the endpoint pairs: `/xss/vulnerable/search` against `/xss/secure/search` for reflected vectors, and `/xss/vulnerable/reviews` against `/xss/secure/reviews` for stored vectors. To execute automated test scripts and output verification metrics, execute `python demo_xss.py`.
+The scripts add test data to the database, so between each run, stop the app in your terminal, delete the database with "rm shop.db" (macOS or Linux) or "del shop.db" (Windows), and start the app again
 
-### What    es not work yet:
-* Attack demonstration scripts and defensive patches for SQL Injection and CSRF, plus thorough validation across all modules.
-* Production server setup for hardened mode, default admin credentials still in the seed data, and session cookie flags. 
+---
 
-### What we plan to add:
-A consistent vulnerable versus hardened toggle across all modules, since only the misconfiguration module has one so far.
+## Project Files
+* `app.py`, `database.py`, `walkthrough.py`, `templates/`, `static/`: the shop, the demo pages and the Switch button (AJ Yaseen)
+* `sqli.py`: SQL injection (Hamza Ghaffari)
+* `xss.py`: cross-site scripting (Nitin Thota)
+* `idor.py`: broken access control (Prajit Alexander)
+* `csrf.py`: cross-site request forgery (Michael Han)
+* `misconfig.py`: security misconfiguration (Marc Gerald Sahagun)
+* `deserialization.py`: insecure deserialization (Shreya Balaji)
+* `requirements-vuln.txt`, `requirements.txt`, `audit-vuln.txt`, `audit-patched.txt`: vulnerable dependencies (Sreyas Chakka)
 
+---
+
+## Limitations
+* The "Add to Cart" buttons on the home page are placeholders, the cart is demonstrated on the insecure deserialization page.
+* Library versions are set during installation, so the vulnerable dependencies demo doesn't have a toggle between hardened and vulnerable modes.

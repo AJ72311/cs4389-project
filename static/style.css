@@ -1,0 +1,64 @@
+:root {
+    --bs-font-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.navbar {
+    background-color: #1f344b;
+}
+
+.navbar-brand {
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.navbar-brand:hover {
+    opacity: 0.8;
+    transform: translateY(-1px);
+}
+
+.form-control,
+.form-select {
+    background-color: #202328;
+    border-color: #202328;
+    color: #fff;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: #202328;
+    border-color: #4f7cac;
+    box-shadow: 0 0 0 0.25rem rgba(79, 124, 172, 0.25);
+    color: #fff;
+}
+
+.form-control::placeholder {
+    color: #8fa3b8;
+}
+
+.form-select {
+    background-image: linear-gradient(45deg, transparent 50%, #fff 50%), linear-gradient(135deg, #fff 50%, transparent 50%);
+    background-position: calc(100% - 20px) 50%, calc(100% - 15px) 50%;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+}
+
+.navbar .btn-outline-light {
+    transition: color 0.2s, background-color 0.2s, border-color 0.2s;
+}
+
+.navbar .btn-outline-light:hover {
+    background-color: #fff;
+    border-color: #fff;
+    color: #1f344b;
+}
+
+.alert-danger.d-flex {
+    background-color: #722828;
+    border-color: #722828;
+    color: #fff;
+}
+
+.alert-success.d-flex {
+    background-color: #3a7a68;
+    border-color: #3a7a68;
+    color: #fff;
+}

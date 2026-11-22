@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vulnerable Dependencies - Toggle10</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="/">Toggle10</a>
+        <a class="btn btn-outline-light btn-sm me-auto" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" class="me-1 align-text-bottom"><path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" /><path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" /></svg> Home</a>
+        <div>
+            {% if user %}
+                <span class="text-white me-2">Hello, {{ user }}</span>
+                <a class="btn btn-outline-danger btn-sm" href="/logout">Logout</a>
+            {% else %}
+                <a class="btn btn-primary btn-sm" href="/login">Login</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="card p-3">
+                <h5>Vulnerable versions</h5>
+                <pre>{{ files['requirements-vuln.txt'] }}</pre>
+                <pre class="mb-0">{{ files['audit-vuln.txt'] }}</pre>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card p-3">
+                <h5>Patched versions</h5>
+                <pre>{{ files['requirements.txt'] }}</pre>
+                <pre class="mb-0">{{ files['audit-patched.txt'] }}</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-3">
+        <h5>This is our Vulnerable Dependencies demonstration! Steps to follow:</h5>
+        <ol class="mb-0">
+            <li>Look at the vulnerable versions on the left... they use old releases of Flask, Werkzeug and Jinja2</li>
+            <li>Read the scan result below them... a scanner called pip-audit found 14 known vulnerabilities in those old releases</li>
+            <li>These old versions can be attacked in different ways, depending on how the app uses them... for example, crashing the site with specially crafted form data, running code through the debug console, injecting scripts into pages, or leaking one visitor's data to another</li>
+            <li>Next, look at the patched versions on the right... they are the same libraries, upgraded</li>
+            <li>Then, read the scan result below them... the same scanner finds no known vulnerabilities, even though our own code did not change</li>
+            <li>Library versions are fixed when you install them, so this demo has no Switch button</li>
+        </ol>
+    </div>
+</div>
+</body>
+</html>

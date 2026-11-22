@@ -9,7 +9,7 @@ the secure route it's rejected with 403. A real transfer from the shop's own
 form (with the token) still works.
 
 To run this program, first run python3 app.py
-while its running, go to your browser and type in http://localhost:5000
+while its running, go to your browser and type in http://localhost:8000
 Go to the login page and log in as alice with password password123. 
 Then run python3 demo_csrf.py in a new terminal. 
 If its not working try running python3 csrf.py first and then run python3 demo_csrf.py in a new terminal.

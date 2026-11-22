@@ -28,7 +28,7 @@ VULNERABLE = MODE == "vulnerable"
 # Origins allowed to call the app from a browser in hardened mode.
 ALLOWED_ORIGINS = set(
     o.strip()
-    for o in os.environ.get("ALLOWED_ORIGINS", "http://localhost:5000").split(",")
+    for o in os.environ.get("ALLOWED_ORIGINS", "http://localhost:8000").split(",")
     if o.strip()
 )
 
@@ -69,7 +69,7 @@ def debug_config():
     return jsonify(
         mode=MODE,
         debug=current_app.debug,
-        secret_key=current_app.secret_key,
+        secret_key=str(current_app.secret_key),
         database="shop.db",
         working_directory=os.getcwd(),
     )

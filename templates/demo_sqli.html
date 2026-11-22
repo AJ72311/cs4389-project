@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SQL Injection - Toggle10</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="/">Toggle10</a>
+        <a class="btn btn-outline-light btn-sm me-auto" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" class="me-1 align-text-bottom"><path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" /><path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" /></svg> Home</a>
+        <div>
+            {% if user %}
+                <span class="text-white me-2">Hello, {{ user }}</span>
+                <a class="btn btn-outline-danger btn-sm" href="/logout">Logout</a>
+            {% else %}
+                <a class="btn btn-primary btn-sm" href="/login">Login</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="alert {% if vulnerable %}alert-danger{% else %}alert-success{% endif %} d-flex justify-content-between align-items-center">
+        <span>Mode: <strong>{% if vulnerable %}Vulnerable{% else %}Hardened{% endif %}</strong></span>
+        {% if user %}
+            <button class="btn btn-dark btn-sm" id="mode-switch">Switch to {% if vulnerable %}Hardened{% else %}Vulnerable{% endif %}</button>
+        {% endif %}
+    </div>
+
+    <div class="card p-3 mb-3">
+        <form data-api="{{ url_for('sqli.search_' ~ version) }}" data-output="result">
+            <label class="form-label">Search products by name</label>
+            <div class="input-group">
+                <input type="text" name="name" class="form-control">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </form>
+        <pre class="mt-3 mb-0 p-3 rounded bg-black text-success" id="result"></pre>
+    </div>
+
+    <div class="card p-3">
+        <h5>This is our SQL Injection demonstration! Steps to follow:</h5>
+        <ol class="mb-0">
+            <li>Log in as "alice" with the password "password123"</li>
+            <li>Type "Laptop" and search... both modes will return just the laptop</li>
+            <li>Next, type "' OR 1=1 --"... vulnerable mode will return every product, because your text changed the command maliciously to match everything! Hardened mode will return nothing, as it neutralizes SQL injection attempts with parameterized queries</li>
+            <li>Then, type "' UNION SELECT id, username, password, role FROM users --"... vulnerable mode will also list every username and password, with the password in the "price" field! Meanwhile, hardened mode again returns nothing</li>
+            <li>Press the Switch button at the top and repeat steps 3 and 4 to see the difference</li>
+        </ol>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='walkthrough.js') }}"></script>
+</body>
+</html>
