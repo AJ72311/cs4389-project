@@ -49,6 +49,18 @@ The scripts add test data to the database, so between each run, stop the app in 
 
 ---
 
+## Vulnerable Dependencies Check
+Install the scanner inside your venv with `pip install pip-audit`. The scans need an internet connection.
+
+* `python audit_dependencies.py` scans both package lists and prints PASS or FAIL
+* `python audit_dependencies.py --mode vulnerable` scans one list (exit code 0 clean, 1 findings, 2 error)
+* `python audit_dependencies.py --save` also rewrites `audit-vuln.txt` and `audit-patched.txt`
+* `python audit_dependencies.py --switch vulnerable` or `--switch patched` installs that set into the venv. Restart the app afterward. It refuses to run outside a venv unless you add `--force`
+
+`verify_all.py` uses the same live scan and falls back to the saved audit files if pip-audit or the network is unavailable.
+
+---
+
 ## Project Files
 * `app.py`, `database.py`, `walkthrough.py`, `templates/`, `static/`: the shop, the demo pages and the Switch button (AJ Yaseen)
 * `sqli.py`: SQL injection (Hamza Ghaffari)
@@ -57,10 +69,11 @@ The scripts add test data to the database, so between each run, stop the app in 
 * `csrf.py`: cross-site request forgery (Michael Han)
 * `misconfig.py`: security misconfiguration (Marc Gerald Sahagun)
 * `deserialization.py`: insecure deserialization (Shreya Balaji)
-* `requirements-vuln.txt`, `requirements.txt`, `audit-vuln.txt`, `audit-patched.txt`: vulnerable dependencies (Sreyas Chakka)
+* `requirements-vuln.txt`, `requirements.txt`, `audit_dependencies.py`, `audit-vuln.txt`, `audit-patched.txt`: vulnerable dependencies (Sreyas Chakka)
 
 ---
 
 ## Limitations
 * The "Add to Cart" buttons on the home page are placeholders, the cart is demonstrated on the insecure deserialization page.
-* Library versions are set during installation, so the vulnerable dependencies demo doesn't have a toggle between hardened and vulnerable modes.
+* Library versions are set during installation, so the vulnerable dependencies page has no Switch button. Use `python audit_dependencies.py --switch` and restart the app instead.
+* The dependency scan only finds published advisories, needs internet access, and may miss transitive vulnerabilities. Its results change as the advisory database is updated.

@@ -2,6 +2,7 @@ import contextlib
 import io
 
 from app import app
+import audit_dependencies
 import demo_csrf
 import demo_deserialization
 import demo_idor
@@ -63,11 +64,19 @@ def check_misconfig():
 
 
 def check_dependencies():
+    # Live scan with pip-audit (Sreyas Chakka). Falls back to the saved results
+    # if pip-audit or the network is unavailable.
+    vulnerable = audit_dependencies.run_audit("vulnerable")
+    patched = audit_dependencies.run_audit("patched")
+    if vulnerable["status"] != "error" and patched["status"] != "error":
+        return vulnerable["status"] == "findings", patched["status"] == "clean"
+
+    print("Dependencies: live scan unavailable, using saved audit files.")
     with open("audit-vuln.txt") as f:
-        vulnerable = f.read()
+        saved_vulnerable = f.read()
     with open("audit-patched.txt") as f:
-        patched = f.read()
-    return "PYSEC" in vulnerable, "No known vulnerabilities found" in patched
+        saved_patched = f.read()
+    return "PYSEC" in saved_vulnerable, "No known vulnerabilities found" in saved_patched
 
 
 CHECKS = [
