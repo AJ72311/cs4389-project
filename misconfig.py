@@ -149,6 +149,11 @@ def init_app(app):
 
     if not VULNERABLE:
         # Replace the weak hardcoded secret key with a strong one.
-        app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(32)
+        secret = os.environ.get("SECRET_KEY")
+        # Under gunicorn each worker would invent its own random key and logins
+        # would break, so a real key must come from the environment there.
+        if not secret and "gunicorn" in os.environ.get("SERVER_SOFTWARE", "").lower():
+            raise SystemExit("Set SECRET_KEY in the environment when using gunicorn")
+        app.secret_key = secret or os.urandom(32)
         # Catch every error so nothing technical reaches the browser.
         app.register_error_handler(Exception, handle_error)
