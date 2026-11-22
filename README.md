@@ -45,6 +45,8 @@ The bar at the top displays the current mode, vulnerable or hardened, and the ap
 
 Each vulnerability also has its own script: `demo_sqli.py`, `demo_xss.py`, `demo_idor.py`, `demo_csrf.py` and `demo_deserialization.py`
 
+`python demo_deserialization_keyleak.py` tests the secure cart with a leaked secret key and times both versions (Shreya Balaji)
+
 The scripts add test data to the database, so between each run, stop the app in your terminal, delete the database with "rm shop.db" (macOS or Linux) or "del shop.db" (Windows), and start the app again
 
 ---
@@ -64,3 +66,4 @@ The scripts add test data to the database, so between each run, stop the app in 
 ## Limitations
 * The "Add to Cart" buttons on the home page are placeholders, the cart is demonstrated on the insecure deserialization page.
 * Library versions are set during installation, so the vulnerable dependencies demo doesn't have a toggle between hardened and vulnerable modes.
+* The Switch button keeps the same secret key (`key-123`), so a strong key is only used when the app is started with APP_MODE=hardened.
