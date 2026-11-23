@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Clickjacking demo (attacker page)</title>
+  <style>
+    iframe { width: 700px; height: 420px; border: 2px solid red; opacity: 0.6; }
+  </style>
+</head>
+<body>
+  <h1>Attacker page: Click here to win a prize!</h1>
+  <p>The frame below is the shop embedded on another origin. If it loads, the app can be clickjacked.</p>
+  <iframe src="http://localhost:8000/"></iframe>
+</body>
+</html>
