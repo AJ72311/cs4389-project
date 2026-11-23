@@ -43,11 +43,11 @@
         <h5>This is our Vulnerable Dependencies demonstration! Steps to follow:</h5>
         <ol class="mb-0">
             <li>Look at the vulnerable versions on the left... they use old releases of Flask, Werkzeug and Jinja2</li>
-            <li>Read the scan result below them... a scanner called pip-audit found 14 known vulnerabilities in those old releases</li>
+            <li>Read the scan result below them... a scanner called pip-audit found 15 distinct known vulnerabilities in those old releases (its table shows 27 rows because some are listed twice)</li>
             <li>These old versions can be attacked in different ways, depending on how the app uses them... for example, crashing the site with specially crafted form data, running code through the debug console, injecting scripts into pages, or leaking one visitor's data to another</li>
             <li>Next, look at the patched versions on the right... they are the same libraries, upgraded</li>
             <li>Then, read the scan result below them... the same scanner finds no known vulnerabilities, even though our own code did not change</li>
-            <li>Library versions are fixed when you install them, so this demo has no Switch button</li>
+            <li>Library versions are fixed when you install them, so this page has no Switch button. To run the app on either set, stop it, run <code>python audit_dependencies.py --switch vulnerable</code> or <code>--switch patched</code>, then start it again</li>
         </ol>
     </div>
 </div>
